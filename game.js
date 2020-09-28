@@ -1,4 +1,4 @@
-let circleColor = (200,200,200); // colour
+let circleColor = (200,200,200);
 let cnv;
 let score = 0;
 let lives = 3;
@@ -12,8 +12,9 @@ function draw() {
 
     background(50);
 
-    fill(0, 102, 153, 51);
+    fill(0, 102, 160, 60);
     text('Score: ' + score.toString(), 10, 290);
+    text('Lives: ' + lives.toString(), 250, 290);
 
     fruit(30, 30, 20, 0);
     drawSlice();
@@ -31,6 +32,10 @@ function draw() {
     // .. if escaped, score--
 
     // if lives = 0, endgame
+    if (lives==0) {
+        score = 0;
+        lives = 3;
+    }
 }
 
 function drawSlice(){
