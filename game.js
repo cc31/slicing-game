@@ -1,19 +1,31 @@
 let d = 30;
+let cx = 30;
+let cy = 30;
 let cnv;
+let score = 0;
 function setup() {
     cnv = createCanvas(500,500);
     cnv.mouseOver(changeGray);
 }
 
 function draw() {
-    background(51);
 
-    ellipse(width / 2, height / 2, d, d);
+    background(50);
+    fill = rbg(0,0,255);
+    circle(cx, cy, d);
 
 }
-function changeGray() {
-    d = d + 10;
-    if (d > 100) {
-      d = 0;
-    }
+
+function fruit() {
+    // set random position
+    // set velocity
 }
+
+// check if sliced
+// if sliced, score++
+
+// check if fruit escaped
+// .. if escaped, score--
+
+// game state
+// .. if 0 end game
