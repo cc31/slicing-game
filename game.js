@@ -1,40 +1,51 @@
-let circleColor = (200,200,200);
-let cnv;
 let score = 0;
-let lives = 3;
+let lives = 10;
+let fruits = [];
+let gameState = false;
 
 function setup() {
-    cnv = createCanvas(300,300);
-    frameRate(10);
+    createCanvas(400,300);
+    frameRate(15);
+
+    for (let i = 0; i < 3; i++) {
+        // create new fruit
+        let x = random(width);
+        let y = height;
+        let r = random(10,30);
+        let c = color(random(0,255), random(0,255), random(0,255));
+        let f = new Fruit(x, y, r, c);
+        fruits.push(f);
+    }
 }
 
 function draw() {
 
-    background(50);
+    background(0);
 
+    // Display Score and Lives
     fill(0, 102, 160, 60);
     text('Score: ' + score.toString(), 10, 290);
     text('Lives: ' + lives.toString(), 250, 290);
 
-    fruit(30, 30, 20, 0);
-    drawSlice();
-
-    // check if sliced
-    // if sliced, score++
-    if (mouseIsOverCircle (30,30,20/2)) {
-        circleColor = color (0, 0, 255);
-        score++;
-    } else {
-        circleColor = color (200, 200 , 200);
+    for (let i = 0; i < fruits.length; i++) {
+        fruits[i].move();
+        fruits[i].show();
+        // if sliced, score++
+        if (fruits[i].sliced) {
+            score++;
+        } 
+        // .. if escaped, score--
+        if (fruits[i].escaped) {
+            fruits.splice(i);
+            lives--;
+        }
     }
-
-    // check if fruit escaped
-    // .. if escaped, score--
-
+    
+    drawSlice();
+    
     // if lives = 0, endgame
-    if (lives==0) {
-        score = 0;
-        lives = 3;
+    if (lives < 1) {
+        // endGame();
     }
 }
 
@@ -44,23 +55,72 @@ function drawSlice(){
     print(pmouseX + ' -> ' + mouseX);
 }
 
-function fruit(cx, cy, d, velocity) {
-    noStroke();
-    fill(circleColor);
-    circle(cx, cy, d);
- 
-    // set random position
-    // set velocity
+class Fruit {
+    constructor(x, y, r, c) {
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.c = c;
+        this.veloX = randomVeloX(x);
+        this.veloY = random(-5, -30);
+    }
+
+    clicked(px, py){
+        let d1 = dist(px, py, this.x, this.y);
+        if (d1 < this.r){
+            score++;
+        }
+    }
+
+    sliced(){
+        // figure out slicing function
+    }
+
+    move(){
+        this.veloX *= 0.99; // air resistance
+        this.veloY += 2; // gravity
+        this.x = this.x + this.veloX;
+        this.y = this.y + this.veloY;
+    }
+
+    show(){
+        noStroke();
+        fill(this.c);
+        circle(this.x, this.y, this.r*2);
+    }
+
+    escaped(){
+        if (this.y > height){
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
-function mouseIsOverCircle(x, y, radius) {
-    var result;
-    //calculate distance betwween mouse posiiton and ellipse poisition
-    var d = dist(mouseX, mouseY, x, y);
-    if (d < radius){
-    	result = true;
-    } else {
-    	result = false;
+function mousePressed() {
+    for (let i = 0; i < fruits.length; i++) {
+        fruits[i].clicked(mouseX, mouseY);
     }
-    return result;
 }
+
+function randomVeloX(x) {
+    if (x > width / 2) {
+        return random(-10, -1);
+    } else {
+        return random(1, 10);
+    }
+}
+
+function endGame() {
+
+    noLoop();
+  
+    textAlign(CENTER);
+    noStroke();
+    fill("#888888");
+    textSize(30);
+    text("game over", width / 2, height / 2);
+    textSize(10);
+    text("Press f5 to restart!", width / 2, height / 2 + 30);
+  }
