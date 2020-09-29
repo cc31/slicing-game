@@ -2,12 +2,14 @@ let score;
 let lives;
 let fruits = [];
 let gameState = false;
+let interval;
 
 function setup() {
     createCanvas(400,300);
     frameRate(30);
-    lives = 10;
+    lives = 3;
     score = 0;
+    interval = 30;
 }
 
 function draw() {
@@ -16,8 +18,8 @@ function draw() {
     drawSlice();
     drawFruit();
     drawScore();
+    speedUp();
     
-    // if lives = 0, endgame
     if (lives < 1) {
         endGame();
     }
@@ -25,6 +27,7 @@ function draw() {
 
 function drawScore(){
     // Display Score and Lives
+    textAlign(LEFT);
     noStroke();
     fill("#ffffff");
     text('Score: ' + score.toString(), 10, 20);
@@ -39,26 +42,35 @@ function drawSlice(){
     // print(pmouseX + ' -> ' + mouseX);
 }
 
+function speedUp(){
+    if (frameCount % 50 === 0){
+        interval--;
+        console.log('interval: '+ interval);
+    }
+}
+
 function drawFruit(){
 
-    if (frameCount % 30 === 0) {
+    if (frameCount % interval === 0) {
+        console.log(frameCount);
         let x = random(width);
         let y = height;
         let r = random(10,30);
         let c = color(random(100,255), random(100,255), random(100,255));
         let f = new Fruit(x, y, r, c);
+        if (frameCount % 35 === 0) {
+            f.bomb = true;
+            f.c = color(255, 0, 0);
+        } 
         fruits.push(f);
     }
 
     for (let i = 0; i < fruits.length; i++) {
         fruits[i].move();
         fruits[i].show();
-        if (fruits[i].clicked()) {
-            score++;
-        }
-        if (fruits[i].escaped) {
+        
+        if (fruits[i].escaped || fruits[i].clicked()) {
             fruits.splice(i,1);
-            lives--;
         }
     }
 }
@@ -72,13 +84,19 @@ class Fruit {
         this.veloX = randomVeloX(x);
         this.veloY = random(-10, -15);
         this.escaped = false;
+        this.bomb = false;
     }
 
     clicked(px, py){
         let d1 = dist(px, py, this.x, this.y);
         if (d1 < this.r){
-            score++;
-            this.r = 0;
+            if (!this.bomb) {
+                this.r = 0;
+                score++;
+            } else {
+                this.r = 0;
+                lives--;
+            }
         }
     }
 
@@ -107,6 +125,15 @@ function mousePressed() {
     for (let i = 0; i < fruits.length; i++) {
         fruits[i].clicked(mouseX, mouseY);
     }
+
+    // restart game
+    if (!gameState) {
+        gameState = true;
+        lives = 3;
+        score = 0;
+        fruits = [];
+        loop();
+    }
 }
 
 function randomVeloX(x) {
@@ -118,6 +145,7 @@ function randomVeloX(x) {
 }
 
 function endGame() {
+    gameState = false;
 
     noLoop();
   
@@ -127,5 +155,5 @@ function endGame() {
     textSize(30);
     text("game over", width / 2, height / 2);
     textSize(10);
-    text("Press f5 to restart!", width / 2, height / 2 + 30);
+    text("Click to restart", width / 2, height / 2 + 30);
 }
